@@ -1,0 +1,82 @@
+services:
+  gateway:
+    build: ../services/gateway
+    container_name: atlas-gateway
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      PROM_URL: http://prometheus:9090
+      SERVICE_TARGETS: >
+        users=http://users-service:4001,orders=http://orders-service:4002
+    ports:
+      - "8880:4000"
+    depends_on:
+      - users-service
+      - orders-service
+      - prometheus
+
+  users-service:
+    build: ../services/users-service
+    container_name: atlas-users
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: users-service
+      PORT: 4001
+    expose:
+      - "4001"
+    ports:
+      - "4001:4001"
+
+  orders-service:
+    build: ../services/orders-service
+    container_name: atlas-orders
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: orders-service
+      PORT: 4002
+    expose:
+      - "4002"
+    ports:
+      - "4002:4002"
+
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: atlas-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: atlas-loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: atlas-jaeger
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+      - "4317:4317"
+      - "4318:4318"
+
+  front:
+    build: ../front
+    container_name: atlas-front
+    environment:
+      VITE_GATEWAY_BASE: http://localhost:8880
+      HOST: 0.0.0.0
+      PORT: 5173
+    ports:
+      - "5173:5173"
+    depends_on:
+      - gateway
+
+networks:
+  default:
+    name: atlaspulse-net

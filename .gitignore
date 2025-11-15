@@ -1,0 +1,5 @@
+# volumes do docker
+.data/
+node_modules/
+dist/
+.env
