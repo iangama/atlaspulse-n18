@@ -1,0 +1,40 @@
+AtlasPulse – Nível 18
+======================
+
+Plataforma de observabilidade com múltiplos serviços, métricas Prometheus, healthgraph e logs reais. O front React consulta PromQL diretamente pelo gateway, oferecendo visualização de métricas e estado de saúde dos serviços em tempo real.
+
+Componentes
+-----------
+gateway: agrega healthchecks, métricas próprias, logs em memória e proxy para PromQL.
+users-service: microserviço real com métricas próprias e rota de demonstração.
+orders-service: segundo microserviço real, também com métricas próprias.
+prometheus: coleta métricas do gateway, users e orders.
+front: painel React que exibe healthgraph, logs e resultados de queries PromQL.
+
+Principais Recursos
+-------------------
+- Healthgraph multi-serviço (users + orders) com latência.
+- Logs reais gerados pelo gateway (healthchecks e PromQL).
+- Execução de consultas PromQL via rota /obs/query.
+- Métricas independentes para cada serviço (Histogram + Counter).
+- Painel React unificado para métricas, logs e estado dos serviços.
+
+Como Rodar
+----------
+docker compose -f infra/docker-compose.yml -p atlaspulse up -d --build
+
+Acessos
+-------
+Frontend: http://localhost:5173
+Gateway: http://localhost:8880
+Prometheus: http://localhost:9091
+
+Testes Básicos
+--------------
+Healthgraph: curl -s http://localhost:8880/obs/healthgraph
+PromQL: curl -s "http://localhost:8880/obs/query?query=up"
+Logs: curl -s http://localhost:8880/obs/logs
+
+Resumo
+------
+Projeto superior ao Nível 17 por incluir múltiplos serviços reais, PromQL no front, healthgraph integrado e logs reais. Mantém escopo do N18 sem incluir tracing distribuído, reservado ao Nível 19.
